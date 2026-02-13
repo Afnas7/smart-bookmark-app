@@ -2,32 +2,31 @@
 
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const router = useRouter();
 
   useEffect(() => {
-    // Listen for login events
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        window.location.href = "/dashboard";
+      }
+    };
+
+    checkSession();
+
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (_event, session) => {
         if (session) {
-          router.push("/dashboard");
+          window.location.href = "/dashboard";
         }
       }
     );
 
-    // Also check existing session on load
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        router.push("/dashboard");
-      }
-    });
-
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, [router]);
+  }, []);
 
   const loginWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
