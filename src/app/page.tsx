@@ -1,26 +1,31 @@
-"use client"
+"use client";
 
-import { supabase } from "@/lib/supabaseClient"
+import { useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
 
-const loginWithGoogle = async () => {
-  try {
-    const { error } = await supabase.auth.signInWithOAuth({
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        router.push("/dashboard");
+      }
+    };
+
+    checkUser();
+  }, []);
+
+  const loginWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}`,
       },
     });
-
-    if (error) throw error;
-  } catch (err) {
-    console.error(err);
-    alert("Login failed");
-  }
-};
-
-
+  };
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -31,5 +36,5 @@ const loginWithGoogle = async () => {
         Login with Google
       </button>
     </div>
-  )
+  );
 }
