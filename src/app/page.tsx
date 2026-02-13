@@ -8,21 +8,21 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkUser = async () => {
+    const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         router.push("/dashboard");
       }
     };
 
-    checkUser();
-  }, []);
+    checkSession();
+  }, [router]);
 
   const loginWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}`,
+        redirectTo: window.location.origin, // not /dashboard
       },
     });
   };
