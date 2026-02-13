@@ -6,19 +6,25 @@ import { supabase } from "@/lib/supabaseClient";
 export default function Home() {
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
+
+    // 1. If OAuth token exists in URL → go dashboard
+    if (window.location.hash.includes("access_token")) {
+      window.location.replace("/dashboard");
+      return;
+    }
+
+    // 2. Check stored session
+    supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        window.location.href = "/dashboard";
+        window.location.replace("/dashboard");
       }
-    };
+    });
 
-    checkSession();
-
+    // 3. Listen for login event
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (session) {
-          window.location.href = "/dashboard";
+          window.location.replace("/dashboard");
         }
       }
     );
@@ -26,6 +32,7 @@ export default function Home() {
     return () => {
       listener.subscription.unsubscribe();
     };
+
   }, []);
 
   const loginWithGoogle = async () => {
