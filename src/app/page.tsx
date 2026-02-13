@@ -5,17 +5,17 @@ import { supabase } from "@/lib/supabaseClient"
 export default function Home() {
 
 const loginWithGoogle = async () => {
-  const redirectUrl =
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:3000/dashboard"
-      : "https://bookmark-f6uchuwqc-afnas-projects-1a8d6b1a.vercel.app/dashboard";
-
-  await supabase.auth.signInWithOAuth({
+  const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: redirectUrl,
+      redirectTo: `${window.location.origin}/dashboard`,
     },
   });
+
+  if (error) {
+    console.error(error);
+    alert("Login failed");
+  }
 };
 
 
