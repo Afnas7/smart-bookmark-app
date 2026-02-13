@@ -8,21 +8,32 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
+    // Listen for login events
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session) {
+          router.push("/dashboard");
+        }
+      }
+    );
+
+    // Also check existing session on load
+    supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
         router.push("/dashboard");
       }
-    };
+    });
 
-    checkSession();
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, [router]);
 
   const loginWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin, // not /dashboard
+        redirectTo: window.location.origin,
       },
     });
   };

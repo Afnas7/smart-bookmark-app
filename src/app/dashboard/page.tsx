@@ -9,8 +9,12 @@ export default function Dashboard() {
   const [url, setUrl] = useState("")
   const [bookmarks, setBookmarks] = useState<any[]>([])
 
- useEffect(() => {
-  getUser()
+useEffect(() => {
+  getUser();
+}, []);
+
+useEffect(() => {
+  if (!user) return;
 
   const channel = supabase
     .channel("bookmarks-changes")
@@ -18,15 +22,15 @@ export default function Dashboard() {
       "postgres_changes",
       { event: "*", schema: "public", table: "bookmarks" },
       () => {
-        if (user) fetchBookmarks(user.id)
+        fetchBookmarks(user.id);
       }
     )
-    .subscribe()
+    .subscribe();
 
   return () => {
-    supabase.removeChannel(channel)
-  }
-}, [user])
+    supabase.removeChannel(channel);
+  };
+}, [user]);
 
 
   const getUser = async () => {
